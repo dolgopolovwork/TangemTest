@@ -1,0 +1,40 @@
+version: '3.5'
+
+services:
+  # SHA2-based Iroha
+  sha2-iroha:
+    image: lebdron/iroha:master-dc920c-ursa
+    container_name: sha2-iroha
+    ports:
+      - 50051:50051
+    depends_on:
+      - iroha-postgres
+    tty: true
+    environment:
+      - KEY=keys/node0
+    entrypoint:
+      - /opt/iroha_data/entrypoint.sh
+    volumes:
+      - iroha_block_store:/tmp/block_store
+      - ../deploy/iroha/:/opt/iroha_data
+    networks:
+      - sha2-iroha-network
+
+  # Iroha postgres
+  iroha-postgres:
+    image: postgres:9.5
+    container_name: iroha-postgres
+    expose:
+      - 5432
+    environment:
+      - POSTGRES_PASSWORD=mysecretpassword
+    volumes:
+      - /var/lib/postgresql/data
+    networks:
+      - sha2-iroha-network
+
+volumes:
+  iroha_block_store:
+
+networks:
+  sha2-iroha-network:

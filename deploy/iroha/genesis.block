@@ -1,0 +1,49 @@
+{
+"blockV1": {
+  "payload": {
+    "transactions": [
+      {
+        "payload": {
+          "reducedPayload": {
+            "commands": [
+              {
+                "addPeer": {
+                  "peer": {
+                    "address": "localhost:10001",
+                    "peerKey": "f64d553e51a4e965006348109267da6bd9752ade9e1c2e74c6515e1149e98953"
+                  }
+                }
+              },
+              {
+                "createRole": {
+                  "roleName": "test",
+                  "permissions": [
+                    "can_set_detail"
+                  ]
+                }
+              },
+              {
+                "createDomain": {
+                  "domainId": "d3",
+                  "defaultRole": "test"
+                }
+              },
+              {
+                "createAccount": {
+                  "accountName": "test",
+                  "domainId": "d3",
+                  "publicKey": "e34857cd8cf1e1d82efd30d606db6b29d8b92ce684b299f48f40d1d7f40cd531"
+                }
+              }
+            ],
+            "quorum": 1
+          }
+        }
+      }
+    ],
+    "txNumber": 1,
+    "height": "1",
+    "prevBlockHash": "0000000000000000000000000000000000000000000000000000000000000000"
+  }
+ }
+}
