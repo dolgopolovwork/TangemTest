@@ -3,6 +3,7 @@ package com.example.testtangem
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import com.tangem.CardManager
 import com.tangem.commands.Card
@@ -33,9 +34,6 @@ class MainActivity : AppCompatActivity() {
     private val cardManagerDelegate: DefaultCardManagerDelegate =
         DefaultCardManagerDelegate(nfcManager.reader)
     private val cardManager = CardManager(nfcManager.reader, cardManagerDelegate)
-    // Iroha ip address. Don't forget to change it before testing.
-    private val iroha = IrohaAPI("192.168.1.7", 50051)
-    private val irohaConsumer = IrohaConsumer(iroha)
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -46,6 +44,7 @@ class MainActivity : AppCompatActivity() {
         lifecycle.addObserver(NfcLifecycleObserver(nfcManager))
         val scanButton: Button = findViewById(R.id.scanButton)!!
         val signButton: Button = findViewById(R.id.signButton)!!
+        val irohaIpAddressEditText: EditText = findViewById(R.id.ipAddress)
         var card: Card? = null
         // First, we have to scan the card to get its id and public key
         scanButton.setOnClickListener { _ ->
@@ -67,6 +66,9 @@ class MainActivity : AppCompatActivity() {
             if (card == null) {
                 toast("Please, scan your card first")
                 return@setOnClickListener
+            } else if (irohaIpAddressEditText.text.toString().isEmpty()) {
+                toast("Please, set Iroha node IP address")
+                return@setOnClickListener
             }
             // Create tx
             val unsignedTransaction = createTransaction()
@@ -87,6 +89,7 @@ class MainActivity : AppCompatActivity() {
                         val signedTx = unsignedTransaction.addSignature(signature).build()
                         signButton.isEnabled = false
                         sendTransactionToIroha(
+                            irohaIpAddressEditText.text.toString(),
                             signedTx,
                             {
                                 signButton.isEnabled = true
@@ -104,15 +107,20 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * Sends a transaction to Iroha node
+     * @param irohaIPAddress - Iroha IP address
      * @param transaction - transaction to send
      * @param onSuccess - function that is executed if a given tx is successfully committed
      * @param onFail - function that is executed on error
      */
     private fun sendTransactionToIroha(
+        irohaIPAddress: String,
         transaction: TransactionOuterClass.Transaction,
         onSuccess: () -> Unit,
         onFail: () -> Unit
     ) {
+        //TODO this thing must be closed properly
+        val iroha = IrohaAPI(irohaIPAddress, 50051)
+        val irohaConsumer = IrohaConsumer(iroha)
         doAsync {
             irohaConsumer.send(transaction).fold({ uiThread { onSuccess() } },
                 { ex ->
